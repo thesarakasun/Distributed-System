@@ -19,7 +19,7 @@ spec:
         - containerPort: 3000
         env:
         - name: REACT_APP_API_URL
-          value: "/api" # Relative path because Nginx handles routing
+          value: "" # Relative path because Nginx handles routing
 ---
 apiVersion: v1
 kind: Service
