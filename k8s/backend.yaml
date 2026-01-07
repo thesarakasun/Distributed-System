@@ -1,4 +1,3 @@
-# k8s/backend.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,27 +25,27 @@ spec:
         - name: CORS_ORIGIN
           value: "*"
         
-        # --- Server Identity (Matches your code's SERVER_NAME) ---
+        # --- Server Identity ---
         - name: SERVER_NAME
           valueFrom:
             fieldRef:
-              fieldPath: metadata.name # Will set SERVER_NAME to "backend-xyz-123"
+              fieldPath: metadata.name 
 
-        # --- Database Config (Matches your code's log output) ---
+        # --- Database Config (CORRECTED NAMES) ---
         - name: DB_HOST
-          value: "postgres-service"
+          value: "postgres-service" # This connects to the other pod
         - name: DB_PORT
           value: "5432"
         - name: DB_NAME
-          value: "notes_db"
-        - name: DB_USER       # Ensure your db config uses these too
-          value: "user"
-        - name: DB_PASS
+          value: "notes_db"  # Must match POSTGRES_DB in postgres.yaml
+        - name: DB_USER
+          value: "user"      # Must match POSTGRES_USER in postgres.yaml
+        - name: DB_PASSWORD  # <--- FIXED: Was DB_PASS
           value: "password123"
         
         # --- Secrets ---
         - name: JWT_SECRET
-          value: "change_this_to_something_secure"
+          value: "your-super-secret-jwt-key-change-in-production"
 ---
 apiVersion: v1
 kind: Service
