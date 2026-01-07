@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: team04registry.azurecr.io/backend:v1
+        ports:
+        - containerPort: 3001
+        env:
+        - name: PORT
+          value: "3001"  # Forces server to run on 3001
+        - name: POSTGRES_HOST
+          value: "postgres-service"
+        - name: POSTGRES_USER
+          value: "user"
+        - name: POSTGRES_PASSWORD
+          value: "password123"
+        - name: JWT_SECRET
+          value: "your-secret-key"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 3001
+    targetPort: 3001
