@@ -1,0 +1,60 @@
+# k8s/backend.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        # REPLACE THIS with your actual ACR login server
+        image: team04registry.azurecr.io/backend:v1
+        ports:
+        - containerPort: 3001
+        env:
+        # --- Network Config ---
+        - name: PORT
+          value: "3001"
+        - name: CORS_ORIGIN
+          value: "*"
+        
+        # --- Server Identity (Matches your code's SERVER_NAME) ---
+        - name: SERVER_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name # Will set SERVER_NAME to "backend-xyz-123"
+
+        # --- Database Config (Matches your code's log output) ---
+        - name: DB_HOST
+          value: "postgres-service"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "notes_db"
+        - name: DB_USER       # Ensure your db config uses these too
+          value: "user"
+        - name: DB_PASS
+          value: "password123"
+        
+        # --- Secrets ---
+        - name: JWT_SECRET
+          value: "change_this_to_something_secure"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 3001
+    targetPort: 3001
