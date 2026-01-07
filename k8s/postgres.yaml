@@ -1,41 +1,54 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: postgres
 spec:
-  replicas: 2
   selector:
     matchLabels:
-      app: backend
+      app: postgres
   template:
     metadata:
       labels:
-        app: backend
+        app: postgres
     spec:
       containers:
-      - name: backend
-        image: team04registry.azurecr.io/backend:v1
-        ports:
-        - containerPort: 3001
+      - name: postgres
+        image: postgres:15-alpine
         env:
-        - name: PORT
-          value: "3001"  # Forces server to run on 3001
-        - name: POSTGRES_HOST
-          value: "postgres-service"
+        - name: POSTGRES_DB
+          value: "notes_db"
         - name: POSTGRES_USER
           value: "user"
         - name: POSTGRES_PASSWORD
           value: "password123"
-        - name: JWT_SECRET
-          value: "your-secret-key"
+        # --- THE FIX IS HERE ---
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        # -----------------------
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: postgres-storage
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-service
+  name: postgres-service
 spec:
-  selector:
-    app: backend
   ports:
-  - port: 3001
-    targetPort: 3001
+  - port: 5432
+  selector:
+    app: postgres
