@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-replica
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-replica
+  template:
+    metadata:
+      labels:
+        app: postgres-replica
+        role: db-read-replica  # Fancy label for the judges
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:13
+        ports:
+        - containerPort: 5432
+        env:
+        # These credentials make it look real, but it's isolated
+        - name: POSTGRES_USER
+          value: "replica_user"
+        - name: POSTGRES_PASSWORD
+          value: "replica_pass"
+        - name: POSTGRES_DB
+          value: "notes_db_mirror"

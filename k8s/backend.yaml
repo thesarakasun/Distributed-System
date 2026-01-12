@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
       - name: backend
-        # REPLACE THIS with your actual ACR login server
-        image: team04registry.azurecr.io/backend:v1
+        # Ensure this matches the image you just built (v7-stable)
+        image: team04registry.azurecr.io/backend:v7-stable
         ports:
         - containerPort: 3001
         env:
@@ -31,16 +31,17 @@ spec:
             fieldRef:
               fieldPath: metadata.name 
 
-        # --- Database Config (CORRECTED NAMES) ---
+        # --- Database Config ---
         - name: DB_HOST
-          value: "postgres-service" # This connects to the other pod
+          value: "postgres-service"
         - name: DB_PORT
           value: "5432"
         - name: DB_NAME
-          value: "notes_db"  # Must match POSTGRES_DB in postgres.yaml
+          value: "notes_db"
         - name: DB_USER
-          value: "user"      # Must match POSTGRES_USER in postgres.yaml
-        - name: DB_PASSWORD  # <--- FIXED: Was DB_PASS
+          value: "user"
+        # THE FIX IS HERE: It must be DB_PASSWORD, not DB_PASS
+        - name: DB_PASSWORD
           value: "password123"
         
         # --- Secrets ---
