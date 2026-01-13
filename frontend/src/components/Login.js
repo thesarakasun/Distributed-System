@@ -67,12 +67,7 @@ function Login() {
           </button>
         </form>
 
-        <div className="demo-credentials">
-          <h3>Demo Credentials:</h3>
-          <p>Admin: admin / password123</p>
-          <p>User: kasun / kasun123</p>
-          <p>Guest: guest / password123</p>
-        </div>
+        
       </div>
     </div>
   );
