@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: team04registry.azurecr.io/frontend:v1
+        image: distributedregistry.azurecr.io/frontend:v1
         ports:
         - containerPort: 3000
         env:
