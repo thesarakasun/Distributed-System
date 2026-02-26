@@ -16,7 +16,7 @@ spec:
       - name: frontend
         image: team04registry.azurecr.io/frontend:v1
         ports:
-        - containerPort: 3001
+        - containerPort: 3000
         env:
         - name: REACT_APP_API_URL
           value: "/" # Relative path because Nginx handles routing
