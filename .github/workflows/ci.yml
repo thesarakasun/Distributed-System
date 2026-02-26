@@ -1,0 +1,156 @@
+name: CI - Build and Push to ACR
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  ACR_NAME: distributedregistry
+  ACR_LOGIN_SERVER: distributedregistry.azurecr.io
+  FRONTEND_IMAGE: distributedregistry.azurecr.io/frontend
+  BACKEND_IMAGE: distributedregistry.azurecr.io/backend
+  NGINX_IMAGE: distributedregistry.azurecr.io/nginx
+
+jobs:
+  build-and-push:
+    name: Build, Push, and Update Manifests
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      # Step 2: Azure Login
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      # Step 3: Login to Azure Container Registry
+      - name: Login to ACR
+        run: |
+          az acr login --name ${{ env.ACR_NAME }}
+          echo "✅ Successfully logged in to ACR: ${{ env.ACR_LOGIN_SERVER }}"
+      
+      # Step 4: Build Frontend Docker Image
+      - name: Build Frontend Image
+        run: |
+          echo "🔨 Building Frontend image with tag: ${{ github.sha }}"
+          docker build \
+            -t ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} \
+            -t ${{ env.FRONTEND_IMAGE }}:latest \
+            -f ./frontend/Dockerfile ./frontend
+          echo "✅ Frontend image built successfully"
+      
+      # Step 5: Push Frontend Image to ACR
+      - name: Push Frontend Image
+        run: |
+          echo "⬆️ Pushing Frontend image to ACR..."
+          docker push ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.FRONTEND_IMAGE }}:latest
+          echo "✅ Frontend image pushed: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"
+      
+      # Step 6: Build Backend Docker Image
+      - name: Build Backend Image
+        run: |
+          echo "🔨 Building Backend image with tag: ${{ github.sha }}"
+          docker build \
+            -t ${{ env.BACKEND_IMAGE }}:${{ github.sha }} \
+            -t ${{ env.BACKEND_IMAGE }}:latest \
+            -f ./backend/Dockerfile ./backend
+          echo "✅ Backend image built successfully"
+      
+      # Step 7: Push Backend Image to ACR
+      - name: Push Backend Image
+        run: |
+          echo "⬆️ Pushing Backend image to ACR..."
+          docker push ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.BACKEND_IMAGE }}:latest
+          echo "✅ Backend image pushed: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}"
+      
+      # Step 8: Build Nginx Docker Image
+      - name: Build Nginx Image
+        run: |
+          echo "🔨 Building Nginx image with tag: ${{ github.sha }}"
+          docker build \
+            -t ${{ env.NGINX_IMAGE }}:${{ github.sha }} \
+            -t ${{ env.NGINX_IMAGE }}:latest \
+            -f ./nginx/Dockerfile ./nginx
+          echo "✅ Nginx image built successfully"
+      
+      # Step 9: Push Nginx Image to ACR
+      - name: Push Nginx Image
+        run: |
+          echo "⬆️ Pushing Nginx image to ACR..."
+          docker push ${{ env.NGINX_IMAGE }}:${{ github.sha }}
+          docker push ${{ env.NGINX_IMAGE }}:latest
+          echo "✅ Nginx image pushed: ${{ env.NGINX_IMAGE }}:${{ github.sha }}"
+      
+      # Step 10: Update Kubernetes Manifests with New Image Tags
+      - name: Update Kubernetes Manifests
+        run: |
+          echo "📝 Updating Kubernetes manifests with commit SHA: ${{ github.sha }}"
+          
+          # Update frontend.yaml
+          sed -i "s|image: ${{ env.FRONTEND_IMAGE }}:.*|image: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}|g" k8s/frontend.yaml
+          echo "✅ Updated frontend.yaml"
+          
+          # Update backend.yaml
+          sed -i "s|image: ${{ env.BACKEND_IMAGE }}:.*|image: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}|g" k8s/backend.yaml
+          echo "✅ Updated backend.yaml"
+          
+          # Update nginx.yaml
+          sed -i "s|image: ${{ env.NGINX_IMAGE }}:.*|image: ${{ env.NGINX_IMAGE }}:${{ github.sha }}|g" k8s/nginx.yaml
+          echo "✅ Updated nginx.yaml"
+          
+          echo "📋 Changes made:"
+          git diff k8s/
+      
+      # Step 11: Configure Git
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
+      # Step 12: Commit and Push Updated Manifests
+      - name: Commit and Push Changes
+        run: |
+          git add k8s/frontend.yaml k8s/backend.yaml k8s/nginx.yaml
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "ℹ️ No changes to commit"
+          else
+            git commit -m "🚀 CI: Update image tags to ${{ github.sha }}" \
+                       -m "Updated by GitHub Actions" \
+                       -m "Workflow: ${{ github.workflow }}" \
+                       -m "Run: ${{ github.run_number }}"
+            
+            git push origin main
+            echo "✅ Changes committed and pushed to main branch"
+          fi
+      
+      # Step 13: Summary
+      - name: Deployment Summary
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ CI Pipeline Completed Successfully!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "📦 Images Built and Pushed:"
+          echo "  • Frontend: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"
+          echo "  • Backend:  ${{ env.BACKEND_IMAGE }}:${{ github.sha }}"
+          echo "  • Nginx:    ${{ env.NGINX_IMAGE }}:${{ github.sha }}"
+          echo ""
+          echo "📝 Kubernetes Manifests Updated:"
+          echo "  • k8s/frontend.yaml"
+          echo "  • k8s/backend.yaml"
+          echo "  • k8s/nginx.yaml"
+          echo ""
+          echo "🔄 GitOps: ArgoCD will detect changes and sync automatically"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
