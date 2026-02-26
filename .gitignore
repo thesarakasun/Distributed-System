@@ -37,3 +37,14 @@ postgres_data/
 
 # Test coverage
 coverage/
+
+# Sensitive credentials and secrets
+argocd-password.txt
+azure-credentials.json
+*.pem
+*.key
+*.crt
+kubeconfig
+
+# Temporary setup scripts output
+setup-github-secret.ps1
