@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
       - name: backend
-        # Ensure this matches the image you just built (v7-stable)
-        image: team04registry.azurecr.io/backend:v7-stable
+        # Ensure this matches the image you just built
+        image: distributedregistry.azurecr.io/backend:v1
         ports:
         - containerPort: 3001
         env:
