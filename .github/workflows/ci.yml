@@ -35,12 +35,12 @@ jobs:
       - name: Login to ACR
         run: |
           az acr login --name ${{ env.ACR_NAME }}
-          echo "✅ Successfully logged in to ACR: ${{ env.ACR_LOGIN_SERVER }}"
+          echo "Successfully logged in to ACR: ${{ env.ACR_LOGIN_SERVER }}"
       
       # Step 4: Build Frontend Docker Image
       - name: Build Frontend Image
         run: |
-          echo "🔨 Building Frontend image with tag: ${{ github.sha }}"
+          echo "Building Frontend image with tag: ${{ github.sha }}"
           docker build \
             -t ${{ env.FRONTEND_IMAGE }}:${{ github.sha }} \
             -t ${{ env.FRONTEND_IMAGE }}:latest \
@@ -50,10 +50,10 @@ jobs:
       # Step 5: Push Frontend Image to ACR
       - name: Push Frontend Image
         run: |
-          echo "⬆️ Pushing Frontend image to ACR..."
+          echo "Pushing Frontend image to ACR..."
           docker push ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
           docker push ${{ env.FRONTEND_IMAGE }}:latest
-          echo "✅ Frontend image pushed: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"
+          echo "Frontend image pushed: ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}"
       
       # Step 6: Build Backend Docker Image
       - name: Build Backend Image

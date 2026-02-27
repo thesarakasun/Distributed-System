@@ -10,7 +10,7 @@ spec:
   
   # Source: Your GitHub repository
   source:
-    repoURL: https://github.com/thesarakasun/Distributed-_System.git
+    repoURL: https://github.com/thesarakasun/Distributed-System.git
     targetRevision: main
     path: k8s
   
