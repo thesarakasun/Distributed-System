@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: distributedregistry.azurecr.io/nginx:7247673026869ae7450ccf3276fa7fe36843d8ee
+        image: distributedregistry.azurecr.io/nginx:da5309bf0822afd32d6ac723a58bd647947e404f
         ports:
         - containerPort: 80
 ---
