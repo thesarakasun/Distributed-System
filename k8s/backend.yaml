@@ -15,7 +15,7 @@ spec:
       containers:
       - name: backend
         # Ensure this matches the image you just built
-        image: distributedregistry.azurecr.io/backend:09cd8aa48421c4d274a049be4c01c3aec0be7334
+        image: distributedregistry.azurecr.io/backend:7247673026869ae7450ccf3276fa7fe36843d8ee
         ports:
         - containerPort: 3001
         env:
