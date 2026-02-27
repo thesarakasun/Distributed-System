@@ -126,7 +126,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "ℹ️ No changes to commit"
           else
-            git commit -m "🚀 CI: Update image tags to ${{ github.sha }}" \
+            git commit -m "CI: Update image tags to ${{ github.sha }}" \
                        -m "Updated by GitHub Actions" \
                        -m "Workflow: ${{ github.workflow }}" \
                        -m "Run: ${{ github.run_number }}"
